@@ -1,0 +1,89 @@
+CREATE PROCEDURE maj_contrat(n_cont_rec INT) 
+BEGIN
+UPDATE contrats 
+SET code_paie = true
+WHERE n_cont = n_cont_rec;
+END
+|
+
+
+CREATE PROCEDURE maj_client(nom_client VARCHAR(30), rue_client VARCHAR(100), code_client INT) 
+BEGIN
+UPDATE clients
+SET Nom_cli = nom_client, Rue_cli = rue_client
+WHERE Code_cli = code_client;
+END
+|
+
+2-CREATE PROCEDURE maj_spe(c_fournisseur INT, t_chaud INT)
+BEGIN
+INSERT INTO specialiser(code_four,code_type)
+VALUES (c_fournisseur,t_chaud);
+END
+|
+
+CREATE FUNCTION calcul2_nbre(puissa_rec INT)
+RETURNS INT
+BEGIN 
+DECLARE nbre_chaud INT;
+SELECT COUNT(*) INTO nbre_chaud
+FROM chaudieres 
+WHERE puissa > puissa_rec;
+RETURN nbre_chaud;
+END
+|
+SELECT calcul2_nbre(75000) AS nbre_retour;
+
+
+3-CREATE FUNCTION maj_synd(code_syndic INT)
+RETURNS VARCHAR(30)
+BEGIN
+DECLARE nom_syndic VARCHAR(30);
+SELECT Nom_synd INTO nom_syndic
+FROM syndics
+WHERE Code_synd = code_syndic;
+RETURN nom_syndic
+END
+|
+SELECT maj_synd(2) AS nom_syndic;
+
+/* 4- Modifier le code précédent pour mettre en place une gestion d'erreurs.
+Dans le cas où le code syndic n'existe pas, afficher le message Code syndic inexistant
+en renvoyant le numéro d'erreur 31005.
+Tester.*/
+
+CREATE FUNCTION calcul3_nbre(puissa_rec INT)
+RETURNS INT
+BEGIN 
+DECLARE nbre_chaud INT;
+SELECT COUNT(*) INTO nbre_chaud 
+FROM chaudieres 
+WHERE puissa > puissa_rec;
+IF nbre_chaud = 0 THEN
+ SIGNAL SQLSTATE '20001' 
+ SET MESSAGE_TEXT = 'Pas de chaudières au dessus de
+ cette puissance';
+END IF
+
+
+CREATE FUNCTION rech_synd(code_syndic INT)
+RETURNS VARCHAR(30)
+BEGIN
+DECLARE nom_syndic VARCHAR(30);
+SELECT Nom_synd INTO nom_syndic
+FROM syndics
+WHERE Code_synd = code_syndic;
+IF nom_syndic IS NULL THEN
+ SIGNAL SQLSTATE '31005' 
+ SET MESSAGE_TEXT = ' Code syndic inexistant';
+END IF;
+RETURN nom_syndic;
+END
+|
+
+
+SELECT maj_synd(2) AS nom_syndic;
+
+
+
+
